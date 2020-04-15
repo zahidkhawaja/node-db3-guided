@@ -1,11 +1,13 @@
 const express = require('express');
 
 const db = require('../data/db-config.js');
+const Users = require("./user-model");
 
 const router = express.Router();
 
+// GET 
 router.get('/', (req, res) => {
-  db('users')
+  Users.all()
   .then(users => {
     res.json(users);
   })
@@ -14,13 +16,13 @@ router.get('/', (req, res) => {
   });
 });
 
+// GET by ID
 router.get('/:id', (req, res) => {
   const { id } = req.params;
 
-  db('users').where({ id })
-  .then(users => {
-    const user = users[0];
-
+  Users.findById(id)
+  .then(user => {
+  
     if (user) {
       res.json(user);
     } else {
@@ -32,10 +34,11 @@ router.get('/:id', (req, res) => {
   });
 });
 
+// POST 
 router.post('/', (req, res) => {
   const userData = req.body;
 
-  db('users').insert(userData)
+  Users.create(userData)
   .then(ids => {
     res.status(201).json({ created: ids[0] });
   })
@@ -44,14 +47,15 @@ router.post('/', (req, res) => {
   });
 });
 
+// PUT 
 router.put('/:id', (req, res) => {
   const { id } = req.params;
   const changes = req.body;
 
-  db('users').where({ id }).update(changes)
-  .then(count => {
-    if (count) {
-      res.json({ update: count });
+  Users.update(id, changes)
+  .then(updated => {
+    if (updated) {
+      res.json({ update: updated });
     } else {
       res.status(404).json({ message: 'Could not find user with given id' });
     }
@@ -61,10 +65,11 @@ router.put('/:id', (req, res) => {
   });
 });
 
+// DELETE
 router.delete('/:id', (req, res) => {
   const { id } = req.params;
 
-  db('users').where({ id }).del()
+  Users.remove(id)
   .then(count => {
     if (count) {
       res.json({ removed: count });
